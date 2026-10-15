@@ -1,0 +1,1 @@
+export const indexController = (req, res) => {res.send("Welcome to the Home Page!");}
