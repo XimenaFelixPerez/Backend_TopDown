@@ -3,31 +3,20 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import session from "express-session";
+
 import loginRoutes from "./routes/login.route.js";
-import indexRoutes from "./routes/index.routes.js";
-import usersRoutes from "./routes/users.route.js";
+import dashboardRoutes from "./routes/dashboard.route.js";
+import nominaRoutes from "./routes/nomina.route.js";
+import notificacionesRoutes from "./routes/notificaciones.route.js";
+import noticiasRoutes from "./routes/noticias.routes.js";
+import adminRoutes from "./routes/admin.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de CORS para permitir solicitudes del Frontend con cookies/sesiones
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://localhost:5500",
-  "http://127.0.0.1:5500",
-  "http://localhost:3000",
-  "http://localhost:8080"
-];
-
+// CORS: permite el frontend local (live-server) con cookies de sesión
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
+  origin: (origin, callback) => callback(null, true),
   credentials: true
 }));
 
@@ -35,6 +24,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Sesión de 5 minutos. "rolling" la renueva con cada petición; sin actividad, expira.
 app.use(session({
   secret: process.env.SESSION_SECRET || "default_session_secret_topdown",
   resave: false,
@@ -49,9 +39,12 @@ app.use(session({
 }));
 
 // Rutas API
-app.use("/api", loginRoutes);
-app.use("/api", indexRoutes);
-app.use("/api", usersRoutes);
+app.use("/api", loginRoutes);           // /login, /verificar, /logout, /yo
+app.use("/api", dashboardRoutes);       // /dashboard
+app.use("/api", nominaRoutes);          // /nomina/...
+app.use("/api", notificacionesRoutes);  // /notificaciones
+app.use("/api", noticiasRoutes);        // /noticias
+app.use("/api", adminRoutes);           // /admin/...  (solo admin)
 
 app.get("/", (req, res) => {
   res.json({
